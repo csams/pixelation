@@ -16,22 +16,22 @@ func Min[T cmp.Ordered](x, y T) T {
 	return y
 }
 
-type Pixel struct {
+type Block struct {
 	Rect image.Rectangle
 	Idx int
 }
 
-type PixelImage struct {
+type BlockImage struct {
 	W, H int
-	Pixels []Pixel
+	Blocks []Block
 	Palette []color.RGBA
 }
 
-func (p *PixelImage) ToImage() image.Image {
+func (p *BlockImage) ToImage() image.Image {
 	img := image.NewRGBA(image.Rect(0, 0, p.W, p.H))
 
-	for i := 0; i < len(p.Pixels); i++ {
-		pix := p.Pixels[i]
+	for i := 0; i < len(p.Blocks); i++ {
+		pix := p.Blocks[i]
 		fillRect(img, pix.Rect, p.Palette[pix.Idx])
 	}
 
@@ -78,15 +78,15 @@ func fillRect(img *image.RGBA, rect image.Rectangle, c color.Color) {
 	}
 }
 
-func Pixelate(img image.Image, paletteSize, pixelSize int) *PixelImage {
+func Pixelate(img image.Image, paletteSize, blockSize int) *BlockImage {
 	q := quantize.MedianCutQuantizer{}
 	p := q.Quantize(make([]color.Color, 0, paletteSize), img)
 
 	bounds := img.Bounds()
-	resultImg := &PixelImage{
+	resultImg := &BlockImage{
 		W: bounds.Dx(),
 		H: bounds.Dy(),
-		Pixels: make([]Pixel, 0),
+		Blocks: make([]Block, 0),
 		Palette: make([]color.RGBA, len(p)),
 	}
 
@@ -96,17 +96,17 @@ func Pixelate(img image.Image, paletteSize, pixelSize int) *PixelImage {
 		resultImg.Palette[i] = c
 	}
 
-	for x := 0; x < bounds.Max.X; x += pixelSize {
-		for y := 0; y < bounds.Max.Y; y += pixelSize {
-			r := image.Rect(x, y, Min(x+pixelSize, bounds.Max.X), Min(y+pixelSize, bounds.Max.Y))
+	for x := 0; x < bounds.Max.X; x += blockSize {
+		for y := 0; y < bounds.Max.Y; y += blockSize {
+			r := image.Rect(x, y, Min(x+blockSize, bounds.Max.X), Min(y+blockSize, bounds.Max.Y))
 			m := CalcMeanColor(img, r)
 			i := p.Index(m)
-			pix := Pixel {
+			pix := Block {
 				Rect: r,
 				Idx: i,
 				
 			}
-			resultImg.Pixels = append(resultImg.Pixels, pix)
+			resultImg.Blocks = append(resultImg.Blocks, pix)
 		}
 	}
 

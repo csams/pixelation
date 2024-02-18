@@ -56,22 +56,22 @@ func ConversionRouter() http.Handler {
 			return
 		}
 
-		pixelWidth := 8
-		pixelWidthParam := r.URL.Query().Get("pixelWidth")
-		if pixelWidthParam != "" {
-			if pw, err := strconv.Atoi(pixelWidthParam); err != nil {
+		blockWidth := 8
+		BlockWidthParam := r.URL.Query().Get("blockWidth")
+		if BlockWidthParam != "" {
+			if pw, err := strconv.Atoi(BlockWidthParam); err != nil {
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
 			} else {
 				if pw < 1 {
-					http.Error(w, "Pixels must have a least width of 1.", http.StatusBadRequest)
+					http.Error(w, "Blocks must have a least width of 1.", http.StatusBadRequest)
 					return
 				}
-				pixelWidth = pw
+				blockWidth = pw
 			}
 		}
 
-		result := pixelate.Pixelate(imageData, numColors, pixelWidth)
+		result := pixelate.Pixelate(imageData, numColors, blockWidth)
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
