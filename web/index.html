@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<style>
+		.form {
+			width: 1000px;
+			clear: both;
+			padding-top: 10px;
+
+		}
+
+		.form input {
+			width: 100%;
+			clear: both;
+		}
+
+		.picture {
+			padding-top: 10px;
+		}
+	</style>
+</head>
+
+<body>
+	<script type="text/javascript">
+		function render(doc) {
+			const canvas = document.getElementById("canvas");
+			canvas.width = doc.W;
+			canvas.height = doc.H;
+			var c = canvas.getContext("2d");
+
+			c.clearRect(0, 0, canvas.width, canvas.height);
+			doc.Blocks.forEach(block => {
+				var p = doc.Palette[block.Idx];
+				var rect = block.Rect;
+				c.fillStyle = `rgb(${p.R}, ${p.G}, ${p.B})`;
+				c.fillRect(rect.Min.X, rect.Min.Y, rect.Max.X - rect.Min.X, rect.Max.Y - rect.Min.Y);
+			});
+		}
+
+		function handleSubmit(event) {
+			event.preventDefault();
+			const fd = new FormData(document.querySelector("#form"));
+			fetch("/api/convert", {
+				method: "post",
+				body: fd
+			}).then((res, err) => {
+				return res.json()
+			}).then((doc, err) => {
+				render(doc);
+			});
+		}
+	</script>
+	<div>
+		<div class="form">
+			<form id="form" name="form" onsubmit="handleSubmit(event)">
+				<label for="colors">Number of colors (from 2 to 256)</label>
+				<input id="colors" name="colors" type="number" min="2" max="256" value="16" />
+				<label for="block-size">Number of pixels in a block (from 1 to 256)</label>
+				<input id="block-size" name="block-size" type="number" min="1" max="256" value="8" />
+				<input id="file" name="file" type="file" accept=".png, .jpg, .jpeg" />
+				<button>Submit</button>
+			</form>
+		</div>
+		<div id="picture" name="picture" class="picture">
+			<canvas id="canvas" name="canvas" />
+		</div>
+	</div>
+</body>
+
+</html>

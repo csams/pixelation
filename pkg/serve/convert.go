@@ -9,17 +9,12 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
-
 	"github.com/csams/pixelation/pkg/pixelate"
 )
 
-func ConversionRouter() http.Handler {
+func ConversionRouter(numColors, blockSize int) http.Handler {
 	r := chi.NewRouter()
-	r.Use(middleware.RequestID)
-	r.Use(middleware.Logger)
-	r.Use(middleware.Compress(5))
-	r.Post("/convert", func(w http.ResponseWriter, r *http.Request) {
+	r.Post("/", func(w http.ResponseWriter, r *http.Request) {
 		err := r.ParseMultipartForm(10 << 20) // 10 MB
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -34,8 +29,7 @@ func ConversionRouter() http.Handler {
 		}
 		defer file.Close()
 
-		numColors := 16
-		colors := r.URL.Query().Get("colors")
+		colors := r.FormValue("colors")
 		if colors != "" {
 			if nc, err := strconv.Atoi(colors); err != nil {
 				http.Error(w, err.Error(), http.StatusBadRequest)
@@ -49,33 +43,31 @@ func ConversionRouter() http.Handler {
 			}
 		}
 
-
 		imageData, _, err := image.Decode(file)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		blockWidth := 8
-		BlockWidthParam := r.URL.Query().Get("blockWidth")
-		if BlockWidthParam != "" {
-			if pw, err := strconv.Atoi(BlockWidthParam); err != nil {
+		BlockSizeParam := r.FormValue("block-size")
+		if BlockSizeParam != "" {
+			if bs, err := strconv.Atoi(BlockSizeParam); err != nil {
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
 			} else {
-				if pw < 1 {
+				if bs < 1 {
 					http.Error(w, "Blocks must have a least width of 1.", http.StatusBadRequest)
 					return
 				}
-				blockWidth = pw
+				blockSize = bs
 			}
 		}
 
-		result := pixelate.Pixelate(imageData, numColors, blockWidth)
+		result := pixelate.Pixelate(imageData, numColors, blockSize)
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(result)
-	});
+	})
 	return r
 }
