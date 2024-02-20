@@ -30,12 +30,12 @@
 			var c = canvas.getContext("2d");
 
 			c.clearRect(0, 0, canvas.width, canvas.height);
-			doc.Blocks.forEach(block => {
+			doc.Grid.forEach(row => row.forEach(block => {
 				var p = doc.Palette[block.Idx];
 				var rect = block.Rect;
 				c.fillStyle = `rgb(${p.R}, ${p.G}, ${p.B})`;
 				c.fillRect(rect.Min.X, rect.Min.Y, rect.Max.X - rect.Min.X, rect.Max.Y - rect.Min.Y);
-			});
+			}));
 		}
 
 		function handleSubmit(event) {

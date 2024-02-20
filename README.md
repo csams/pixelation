@@ -12,7 +12,7 @@ It works on `jpeg` and `png` images.
 ```
 In another terminal
 ```
-$ curl -v --compressed -F file=@/path/to/some/picture.jpg 'http://localhost:8080/convert?blockWidth=8&colors=16' > output.json
+$ curl -v --compressed -F block-width=8 -F colors=16 -F file=@/path/to/some/picture.jpg 'http://localhost:8080/api/convert' > output.json
 $ ./bin/pixelate --render --input=output.json --output=output.jpeg
 ```
 
