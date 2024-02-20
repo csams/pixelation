@@ -23,6 +23,15 @@
 
 <body>
 	<script type="text/javascript">
+
+		var blockImage;
+
+		function clear(doc) {
+			doc.Grid.forEach(row => row.forEach(block => {
+				block.Filled = false;
+			}));
+		}
+
 		function render(doc) {
 			const canvas = document.getElementById("canvas");
 			canvas.width = doc.W;
@@ -31,10 +40,12 @@
 
 			c.clearRect(0, 0, canvas.width, canvas.height);
 			doc.Grid.forEach(row => row.forEach(block => {
-				var p = doc.Palette[block.Idx];
-				var rect = block.Rect;
-				c.fillStyle = `rgb(${p.R}, ${p.G}, ${p.B})`;
-				c.fillRect(rect.Min.X, rect.Min.Y, rect.Max.X - rect.Min.X, rect.Max.Y - rect.Min.Y);
+				if (block.Filled) {
+					var p = doc.Palette[block.Idx];
+					var rect = block.Rect;
+					c.fillStyle = `rgb(${p.R}, ${p.G}, ${p.B})`;
+					c.fillRect(rect.Min.X, rect.Min.Y, rect.Max.X - rect.Min.X, rect.Max.Y - rect.Min.Y);
+				}
 			}));
 		}
 
@@ -47,9 +58,29 @@
 			}).then((res, err) => {
 				return res.json()
 			}).then((doc, err) => {
+				blockImage = doc;
+				clear(blockImage);
 				render(doc);
 			});
 		}
+
+		function handleClick(event) {
+			event.preventDefault();
+			var elem = document.getElementById('canvas'),
+				elemLeft = elem.offsetLeft + elem.clientLeft,
+				elemTop = elem.offsetTop + elem.clientTop;
+
+			var x = event.pageX - elemLeft,
+				y = event.pageY - elemTop;
+
+			var row = Math.trunc(x / blockImage.BlockSize);
+			var col = Math.trunc(y / blockImage.BlockSize);
+			console.log(`${x}, ${y} => ${row}, ${col}`);
+
+			blockImage.Grid[row][col].Filled = true;
+			render(blockImage);
+		}
+
 	</script>
 	<div>
 		<div class="form">
@@ -63,7 +94,7 @@
 			</form>
 		</div>
 		<div id="picture" name="picture" class="picture">
-			<canvas id="canvas" name="canvas" />
+			<canvas id="canvas" name="canvas" onclick="handleClick(event)" />
 		</div>
 	</div>
 </body>
