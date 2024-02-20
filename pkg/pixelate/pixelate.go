@@ -27,6 +27,7 @@ type BlockImage struct {
 	Palette []color.RGBA
 }
 
+// ToImage creates an image.Image from the BlockImage
 func (p *BlockImage) ToImage() image.Image {
 	img := image.NewRGBA(image.Rect(0, 0, p.W, p.H))
 
@@ -36,6 +37,14 @@ func (p *BlockImage) ToImage() image.Image {
 	}
 
 	return img
+}
+
+func fillRect(img *image.RGBA, rect image.Rectangle, c color.Color) {
+	for x := rect.Min.X; x < rect.Max.X; x++ {
+		for y := rect.Min.Y; y < rect.Max.Y; y++ {
+			img.Set(x, y, c)
+		}
+	}
 }
 
 // CalcMeanColor computes the geometric average of the pixels in a given image.Rectangle.
@@ -70,14 +79,6 @@ func CalcMeanColor(img image.Image, rect image.Rectangle) color.Color {
 	return color.RGBA{R, G, B, 255}
 }
 
-func fillRect(img *image.RGBA, rect image.Rectangle, c color.Color) {
-	for x := rect.Min.X; x < rect.Max.X; x++ {
-		for y := rect.Min.Y; y < rect.Max.Y; y++ {
-			img.Set(x, y, c)
-		}
-	}
-}
-
 func Pixelate(img image.Image, paletteSize, blockSize int) *BlockImage {
 	q := quantize.MedianCutQuantizer{}
 	p := q.Quantize(make([]color.Color, 0, paletteSize), img)
@@ -101,12 +102,11 @@ func Pixelate(img image.Image, paletteSize, blockSize int) *BlockImage {
 			r := image.Rect(x, y, Min(x+blockSize, bounds.Max.X), Min(y+blockSize, bounds.Max.Y))
 			m := CalcMeanColor(img, r)
 			i := p.Index(m)
-			pix := Block {
+			block := Block {
 				Rect: r,
 				Idx: i,
-				
 			}
-			resultImg.Blocks = append(resultImg.Blocks, pix)
+			resultImg.Blocks = append(resultImg.Blocks, block)
 		}
 	}
 
