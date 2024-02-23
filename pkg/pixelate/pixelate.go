@@ -110,9 +110,9 @@ func Pixelate(img image.Image, numColors, blockSize int) *BlockImage {
 	}
 
 	// build up the image
-	for x := 0; x < bounds.Max.X; x += blockSize {
+	for y := 0; y < bounds.Max.Y; y += blockSize {
 		row := make([]Block, 0)
-		for y := 0; y < bounds.Max.Y; y += blockSize {
+		for x := 0; x < bounds.Max.X; x += blockSize {
 			r := image.Rect(x, y, Min(x+blockSize, bounds.Max.X), Min(y+blockSize, bounds.Max.Y))
 			m := CalcMeanColor(img, r)
 			i := p.Index(m)

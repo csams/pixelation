@@ -25,7 +25,7 @@
     <script src="lib.js"> </script>
     <div>
         <div class="form">
-            <form id="form" name="form" onsubmit="handleSubmit(event)" >
+            <form id="form" name="form" onsubmit="handleSubmit(event)">
                 <label for="colors">Number of colors (from 2 to 256)</label>
                 <input id="colors" name="colors" type="number" min="2" max="256" value="16" />
                 <label for="block-size">Number of pixels in a block (from 1 to 256)</label>
@@ -35,7 +35,8 @@
             </form>
         </div>
         <div id="picture" name="picture" class="picture">
-            <canvas id="canvas" name="canvas" onclick="handleClick(event)" onmousedown="handleMouseDown(event)" onmouseup="handleMouseUp(event)" onmousemove="handleMouseMove(event)" />
+            <canvas id="canvas" name="canvas" onmousedown="handleMouseDown(event)"
+                onmouseup="handleMouseUp(event)" onmousemove="handleMouseMove(event)" ondblclick="handleDoubleClick(event)"/>
         </div>
     </div>
 </body>
