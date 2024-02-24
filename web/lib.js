@@ -44,17 +44,24 @@ function render(image) {
         return;
     }
     c.clearRect(0, 0, canvas.width, canvas.height);
+    let d = Math.trunc(image.BlockSize / 2);
     image.Grid.forEach(row => row.forEach(block => {
-        let p = image.Palette[block.Idx];
         let rect = block.Rect;
-        let d = 64 / 255;
-        let color = block.Filled ? `rgb(${p.R}, ${p.G}, ${p.B})` : "black";
-        c.fillStyle = color;
-        c.fillRect(rect.Min.X, rect.Min.Y, rect.Max.X - rect.Min.X, rect.Max.Y - rect.Min.Y);
+        if (block.Filled) {
+            let p = image.Palette[block.Idx];
+            let color = `rgb(${p.R}, ${p.G}, ${p.B})`;
+            c.fillStyle = color;
+            c.fillRect(rect.Min.X, rect.Min.Y, rect.Max.X - rect.Min.X, rect.Max.Y - rect.Min.Y);
+        }
+        else {
+            c.textAlign = "center";
+            c.fillStyle = "black";
+            c.font = `${image.BlockSize}px serif`;
+            c.lineWidth = 1;
+            c.strokeRect(rect.Min.X, rect.Min.Y, rect.Max.X - rect.Min.X, rect.Max.Y - rect.Min.Y);
+            c.fillText(`${block.Idx + 1}`, rect.Min.X + d, rect.Min.Y + image.BlockSize, image.BlockSize - 1);
+        }
     }));
-}
-function drawBlock(pt) {
-    blockImage.Grid[pt.Y][pt.X].Filled = true;
 }
 function handleSubmit(event) {
     event.preventDefault();
@@ -73,8 +80,8 @@ function handleSubmit(event) {
 function getGridLocation(event) {
     var elem = document.getElementById('canvas'), elemLeft = elem.offsetLeft + elem.clientLeft, elemTop = elem.offsetTop + elem.clientTop;
     var x = event.pageX - elemLeft, y = event.pageY - elemTop;
-    x = Math.trunc(x / blockImage.BlockSize);
-    y = Math.trunc(y / blockImage.BlockSize);
+    x = Math.floor(x / blockImage.BlockSize);
+    y = Math.floor(y / blockImage.BlockSize);
     return new Point(x, y);
 }
 function flood(pt) {
@@ -83,28 +90,27 @@ function flood(pt) {
         return;
     }
     block.Filled = true;
-    console.log(`Flooding ${pt.X}, ${pt.Y}`);
     // fill left
     if (pt.X - 1 >= 0) {
-        if (block.Idx == blockImage.Grid[pt.Y][pt.X - 1].Idx) {
+        if (block.Idx === blockImage.Grid[pt.Y][pt.X - 1].Idx) {
             flood(new Point(pt.X - 1, pt.Y));
         }
     }
     // fill right
     if (pt.X + 1 < blockImage.Grid[pt.Y].length) {
-        if (block.Idx == blockImage.Grid[pt.Y][pt.X + 1].Idx) {
+        if (block.Idx === blockImage.Grid[pt.Y][pt.X + 1].Idx) {
             flood(new Point(pt.X + 1, pt.Y));
         }
     }
     // fill up
     if (pt.Y - 1 >= 0) {
-        if (block.Idx == blockImage.Grid[pt.Y - 1][pt.X].Idx) {
+        if (block.Idx === blockImage.Grid[pt.Y - 1][pt.X].Idx) {
             flood(new Point(pt.X, pt.Y - 1));
         }
     }
     // fill down
     if (pt.Y + 1 < blockImage.Grid.length) {
-        if (block.Idx == blockImage.Grid[pt.Y + 1][pt.X].Idx) {
+        if (block.Idx === blockImage.Grid[pt.Y + 1][pt.X].Idx) {
             flood(new Point(pt.X, pt.Y + 1));
         }
     }

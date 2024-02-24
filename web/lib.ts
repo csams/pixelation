@@ -54,18 +54,23 @@ function render(image: BlockImage) {
     }
 
     c.clearRect(0, 0, canvas.width, canvas.height);
+    let d = Math.floor(image.BlockSize / 2);
     image.Grid.forEach(row => row.forEach(block => {
-        let p = image.Palette[block.Idx];
         let rect = block.Rect;
-        let d: number = 64 / 255;
-        let color: string = block.Filled ? `rgb(${p.R}, ${p.G}, ${p.B})` : "black";
-        c.fillStyle = color;
-        c.fillRect(rect.Min.X, rect.Min.Y, rect.Max.X - rect.Min.X, rect.Max.Y - rect.Min.Y);
+        if (block.Filled) {
+            let p = image.Palette[block.Idx];
+            let color: string = `rgb(${p.R}, ${p.G}, ${p.B})`;
+            c.fillStyle = color;
+            c.fillRect(rect.Min.X, rect.Min.Y, rect.Max.X - rect.Min.X, rect.Max.Y - rect.Min.Y);
+        } else {
+            c.textAlign = "center";
+            c.fillStyle = "black";
+            c.font = `${image.BlockSize}px serif`;
+            c.lineWidth = 1;
+            c.strokeRect(rect.Min.X, rect.Min.Y, rect.Max.X - rect.Min.X, rect.Max.Y - rect.Min.Y);
+            c.fillText(`${block.Idx + 1}`, rect.Min.X + d, rect.Min.Y + image.BlockSize, image.BlockSize - 1);
+        }
     }));
-}
-
-function drawBlock(pt: Point) {
-    blockImage.Grid[pt.Y][pt.X].Filled = true;
 }
 
 function handleSubmit(event: SubmitEvent) {
@@ -91,48 +96,47 @@ function getGridLocation(event: MouseEvent): Point {
     var x = event.pageX - elemLeft,
         y = event.pageY - elemTop;
 
-    x = Math.trunc(x / blockImage.BlockSize);
-    y = Math.trunc(y / blockImage.BlockSize);
+    x = Math.floor(x / blockImage.BlockSize);
+    y = Math.floor(y / blockImage.BlockSize);
     return new Point(x, y);
 
 }
 
 function flood(pt: Point) {
     let block: Block = blockImage.Grid[pt.Y][pt.X];
-    if (block.Filled){
+    if (block.Filled) {
         return;
     }
-    
+
     block.Filled = true;
-    console.log(`Flooding ${pt.X}, ${pt.Y}`);
+
     // fill left
     if (pt.X - 1 >= 0) {
-        if (block.Idx == blockImage.Grid[pt.Y][pt.X - 1].Idx) {
+        if (block.Idx === blockImage.Grid[pt.Y][pt.X - 1].Idx) {
             flood(new Point(pt.X - 1, pt.Y));
         }
     }
 
     // fill right
     if (pt.X + 1 < blockImage.Grid[pt.Y].length) {
-        if (block.Idx == blockImage.Grid[pt.Y][pt.X + 1].Idx) {
+        if (block.Idx === blockImage.Grid[pt.Y][pt.X + 1].Idx) {
             flood(new Point(pt.X + 1, pt.Y));
         }
     }
 
     // fill up
     if (pt.Y - 1 >= 0) {
-        if (block.Idx == blockImage.Grid[pt.Y - 1][pt.X].Idx) {
+        if (block.Idx === blockImage.Grid[pt.Y - 1][pt.X].Idx) {
             flood(new Point(pt.X, pt.Y - 1));
         }
     }
 
     // fill down
     if (pt.Y + 1 < blockImage.Grid.length) {
-        if (block.Idx == blockImage.Grid[pt.Y + 1][pt.X].Idx) {
+        if (block.Idx === blockImage.Grid[pt.Y + 1][pt.X].Idx) {
             flood(new Point(pt.X, pt.Y + 1));
         }
     }
-
 }
 
 function handleDoubleClick(event: MouseEvent) {
