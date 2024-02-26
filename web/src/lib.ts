@@ -5,9 +5,33 @@ var blockImage: BlockImage;
 var down = false;
 
 function clear(doc: BlockImage): void {
-    doc.Grid.forEach(row => row.forEach(block => {
+    blockImage.Font = `${blockImage.BlockSize}px serif`;
+    doc.Grid.forEach(row => row.forEach((block: Block) => {
         block.Filled = false;
     }));
+}
+
+function handleClear() {
+    clear(blockImage);
+    render(blockImage);
+}
+
+function handleFloodFill() {
+    blockImage.Grid.forEach(row => row.forEach((block: Block) => {
+        block.Filled = true;
+    }));
+    render(blockImage);
+}
+
+function with2dContext(f: ((c: CanvasRenderingContext2D) => void)) {
+    const canvas = document.querySelector("#canvas") as HTMLCanvasElement;
+    let c = canvas.getContext("2d") as CanvasRenderingContext2D;
+
+    if (!c) {
+        console.log("Couldn't get canvas context.");
+        return;
+    }
+    f(c);
 }
 
 function paintBlock(c: CanvasRenderingContext2D, image: BlockImage, block: Block): void {
@@ -21,7 +45,7 @@ function paintBlock(c: CanvasRenderingContext2D, image: BlockImage, block: Block
         let d = Math.floor(image.BlockSize / 2);
         c.textAlign = "center";
         c.fillStyle = "black";
-        c.font = `${image.BlockSize}px serif`;
+        c.font = image.Font;
         c.lineWidth = 1;
         c.strokeRect(rect.Min.X, rect.Min.Y, rect.Max.X - rect.Min.X, rect.Max.Y - rect.Min.Y);
         c.fillText(`${block.Idx + 1}`, rect.Min.X + d, rect.Min.Y + image.BlockSize, image.BlockSize - 1);
@@ -45,7 +69,7 @@ function render(image: BlockImage): void {
     }));
 }
 
-export function handleSubmit(event: MouseEvent<HTMLFormElement>): void {
+function handleSubmit(event: MouseEvent<HTMLFormElement>): void {
     event.preventDefault();
     const fd = new FormData(document.querySelector("#form") as HTMLFormElement);
     fetch("/api/convert", {
@@ -75,64 +99,71 @@ function getGridLocation(event: MouseEvent): Point {
 
 function flood(point: Point): void {
     let blocks = new Array<Block>();
+    let stack = new Array<Point>();
 
-    let inner = (pt: Point) => {
-        let block: Block = blockImage.Grid[pt.Y][pt.X];
-        if (block.Filled) {
-            return;
-        }
-
-        block.Filled = true;
-        blocks.push(block);
-
-        // fill left
-        if (pt.X - 1 >= 0) {
-            if (block.Idx === blockImage.Grid[pt.Y][pt.X - 1].Idx) {
-                inner({ X: pt.X - 1, Y: pt.Y });
-            }
-        }
-
-        // fill right
-        if (pt.X + 1 < blockImage.Grid[pt.Y].length) {
-            if (block.Idx === blockImage.Grid[pt.Y][pt.X + 1].Idx) {
-                inner({ X: pt.X + 1, Y: pt.Y });
-            }
-        }
-
-        // fill up
-        if (pt.Y - 1 >= 0) {
-            if (block.Idx === blockImage.Grid[pt.Y - 1][pt.X].Idx) {
-                inner({ X: pt.X, Y: pt.Y - 1 });
-            }
-        }
-
-        // fill down
-        if (pt.Y + 1 < blockImage.Grid.length) {
-            if (block.Idx === blockImage.Grid[pt.Y + 1][pt.X].Idx) {
-                inner({ X: pt.X, Y: pt.Y + 1 });
-            }
-        }
-    }
-    inner(point);
-
-    const canvas = document.querySelector("#canvas") as HTMLCanvasElement;
-    let c = canvas.getContext("2d") as CanvasRenderingContext2D;
-
-    if (!c) {
-        console.log("Couldn't get canvas context.");
+    let block: Block = blockImage.Grid[point.Y][point.X];
+    if (block.Filled) {
         return;
     }
 
-    blocks.forEach(block => {
-        paintBlock(c, blockImage, block);
-    });
+    stack.push(point);
+
+    while (stack.length > 0) {
+        let pt = stack.pop();
+
+        if (pt != null) {
+            block = blockImage.Grid[pt.Y][pt.X];
+            block.Filled = true;
+            blocks.push(block);
+
+            // fill left
+            if (pt.X - 1 >= 0) {
+                let other = blockImage.Grid[pt.Y][pt.X - 1];
+                if (block.Idx === other.Idx && !other.Filled) {
+                    stack.push({ X: pt.X - 1, Y: pt.Y });
+                }
+            }
+
+            // fill right
+            if (pt.X + 1 < blockImage.Grid[pt.Y].length) {
+                let other = blockImage.Grid[pt.Y][pt.X + 1];
+                if (block.Idx === other.Idx && !other.Filled) {
+                    stack.push({ X: pt.X + 1, Y: pt.Y });
+                }
+            }
+
+            // fill up
+            if (pt.Y - 1 >= 0) {
+                let other = blockImage.Grid[pt.Y - 1][pt.X];
+                if (block.Idx === other.Idx && !other.Filled) {
+                    stack.push({ X: pt.X, Y: pt.Y - 1 });
+                }
+            }
+
+            // fill down
+            if (pt.Y + 1 < blockImage.Grid.length) {
+                let other = blockImage.Grid[pt.Y + 1][pt.X];
+                if (block.Idx === other.Idx && !other.Filled) {
+                    stack.push({ X: pt.X, Y: pt.Y + 1 });
+                }
+            }
+
+        } else {
+            break;
+        }
+    }
+
+    with2dContext(c => {
+        blocks.forEach(block => {
+            paintBlock(c, blockImage, block);
+        });
+    })
 }
 
 function handleDoubleClick(event: MouseEvent<HTMLCanvasElement>): void {
     event.preventDefault();
     let pt = getGridLocation(event);
     flood(pt);
-    render(blockImage);
 }
 
 function handleClick(event: MouseEvent): void {
@@ -152,18 +183,14 @@ function handleMouseMove(event: MouseEvent<HTMLCanvasElement>): void {
 
         let block = blockImage.Grid[pt.Y][pt.X];
         block.Filled = true;
-        const canvas = document.querySelector("#canvas") as HTMLCanvasElement;
-        let c = canvas.getContext("2d") as CanvasRenderingContext2D;
-
-        if (!c) {
-            console.log("Couldn't get canvas context.");
-            return;
-        }
-        paintBlock(c, blockImage, block);
+        with2dContext(c => paintBlock(c, blockImage, block));
     }
 }
 
-function handleMouseDown(): void {
+function handleMouseDown(event: MouseEvent<HTMLCanvasElement>): void {
+    if (event.detail > 1) {
+        event.preventDefault();
+    }
     down = true;
 }
 
@@ -171,4 +198,4 @@ function handleMouseUp(): void {
     down = false;
 }
 
-export { handleClick, handleDoubleClick, handleMouseDown, handleMouseUp, handleMouseMove }
+export {handleClear, handleFloodFill, handleClick, handleDoubleClick, handleMouseDown, handleMouseUp, handleMouseMove, handleSubmit }

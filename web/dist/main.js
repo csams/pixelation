@@ -33372,23 +33372,58 @@ var __extends = (undefined && undefined.__extends) || (function () {
 })();
 
 
+var Form = /** @class */ (function (_super) {
+    __extends(Form, _super);
+    function Form() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Form.prototype.render = function () {
+        return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "form" },
+            react__WEBPACK_IMPORTED_MODULE_0___default().createElement("form", { id: "form", name: "form", onSubmit: _lib__WEBPACK_IMPORTED_MODULE_1__.handleSubmit },
+                react__WEBPACK_IMPORTED_MODULE_0___default().createElement("label", { htmlFor: "colors" }, "Number of colors (from 2 to 256)"),
+                react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", { id: "colors", name: "colors", type: "number", min: "2", max: "256", defaultValue: "16" }),
+                react__WEBPACK_IMPORTED_MODULE_0___default().createElement("label", { htmlFor: "block-size" }, "Number of pixels in a block (from 1 to 256)"),
+                react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", { id: "block-size", name: "block-size", type: "number", min: "1", max: "256", defaultValue: "8" }),
+                react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", { id: "file", name: "file", type: "file", accept: ".png, .jpg, .jpeg" }),
+                react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", null, "Submit"))));
+    };
+    return Form;
+}(react__WEBPACK_IMPORTED_MODULE_0__.Component));
+var Controls = /** @class */ (function (_super) {
+    __extends(Controls, _super);
+    function Controls() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Controls.prototype.render = function () {
+        return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "controls" },
+            react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "control" },
+                react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", { onClick: _lib__WEBPACK_IMPORTED_MODULE_1__.handleFloodFill }, "Fill")),
+            react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "control" },
+                react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", { onClick: _lib__WEBPACK_IMPORTED_MODULE_1__.handleClear }, "Clear"))));
+    };
+    return Controls;
+}(react__WEBPACK_IMPORTED_MODULE_0__.Component));
+var Picture = /** @class */ (function (_super) {
+    __extends(Picture, _super);
+    function Picture() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Picture.prototype.render = function () {
+        return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { id: "picture", className: "picture-container" },
+            react__WEBPACK_IMPORTED_MODULE_0___default().createElement("canvas", { id: "canvas", className: "picture", onMouseDown: _lib__WEBPACK_IMPORTED_MODULE_1__.handleMouseDown, onMouseUp: _lib__WEBPACK_IMPORTED_MODULE_1__.handleMouseUp, onMouseMove: _lib__WEBPACK_IMPORTED_MODULE_1__.handleMouseMove, onDoubleClick: _lib__WEBPACK_IMPORTED_MODULE_1__.handleDoubleClick })));
+    };
+    return Picture;
+}(react__WEBPACK_IMPORTED_MODULE_0__.Component));
 var App = /** @class */ (function (_super) {
     __extends(App, _super);
     function App() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
     App.prototype.render = function () {
-        return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null,
-            react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "form" },
-                react__WEBPACK_IMPORTED_MODULE_0___default().createElement("form", { id: "form", name: "form", onSubmit: _lib__WEBPACK_IMPORTED_MODULE_1__.handleSubmit },
-                    react__WEBPACK_IMPORTED_MODULE_0___default().createElement("label", { htmlFor: "colors" }, "Number of colors (from 2 to 256)"),
-                    react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", { id: "colors", name: "colors", type: "number", min: "2", max: "256", value: "16" }),
-                    react__WEBPACK_IMPORTED_MODULE_0___default().createElement("label", { htmlFor: "block-size" }, "Number of pixels in a block (from 1 to 256)"),
-                    react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", { id: "block-size", name: "block-size", type: "number", min: "1", max: "256", value: "8" }),
-                    react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", { id: "file", name: "file", type: "file", accept: ".png, .jpg, .jpeg" }),
-                    react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", null, "Submit"))),
-            react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { id: "picture", className: "picture" },
-                react__WEBPACK_IMPORTED_MODULE_0___default().createElement("canvas", { id: "canvas", onMouseDown: _lib__WEBPACK_IMPORTED_MODULE_1__.handleMouseDown, onMouseUp: _lib__WEBPACK_IMPORTED_MODULE_1__.handleMouseUp, onMouseMove: _lib__WEBPACK_IMPORTED_MODULE_1__.handleMouseMove, onDoubleClick: _lib__WEBPACK_IMPORTED_MODULE_1__.handleDoubleClick }))));
+        return (react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", { className: "box" },
+            react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Form, null),
+            react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Controls, null),
+            react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Picture, null)));
     };
     return App;
 }(react__WEBPACK_IMPORTED_MODULE_0__.Component));
@@ -33405,8 +33440,10 @@ var App = /** @class */ (function (_super) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   handleClear: () => (/* binding */ handleClear),
 /* harmony export */   handleClick: () => (/* binding */ handleClick),
 /* harmony export */   handleDoubleClick: () => (/* binding */ handleDoubleClick),
+/* harmony export */   handleFloodFill: () => (/* binding */ handleFloodFill),
 /* harmony export */   handleMouseDown: () => (/* binding */ handleMouseDown),
 /* harmony export */   handleMouseMove: () => (/* binding */ handleMouseMove),
 /* harmony export */   handleMouseUp: () => (/* binding */ handleMouseUp),
@@ -33415,9 +33452,29 @@ __webpack_require__.r(__webpack_exports__);
 var blockImage;
 var down = false;
 function clear(doc) {
+    blockImage.Font = "".concat(blockImage.BlockSize, "px serif");
     doc.Grid.forEach(function (row) { return row.forEach(function (block) {
         block.Filled = false;
     }); });
+}
+function handleClear() {
+    clear(blockImage);
+    render(blockImage);
+}
+function handleFloodFill() {
+    blockImage.Grid.forEach(function (row) { return row.forEach(function (block) {
+        block.Filled = true;
+    }); });
+    render(blockImage);
+}
+function with2dContext(f) {
+    var canvas = document.querySelector("#canvas");
+    var c = canvas.getContext("2d");
+    if (!c) {
+        console.log("Couldn't get canvas context.");
+        return;
+    }
+    f(c);
 }
 function paintBlock(c, image, block) {
     var rect = block.Rect;
@@ -33431,7 +33488,7 @@ function paintBlock(c, image, block) {
         var d = Math.floor(image.BlockSize / 2);
         c.textAlign = "center";
         c.fillStyle = "black";
-        c.font = "".concat(image.BlockSize, "px serif");
+        c.font = image.Font;
         c.lineWidth = 1;
         c.strokeRect(rect.Min.X, rect.Min.Y, rect.Max.X - rect.Min.X, rect.Max.Y - rect.Min.Y);
         c.fillText("".concat(block.Idx + 1), rect.Min.X + d, rect.Min.Y + image.BlockSize, image.BlockSize - 1);
@@ -33474,54 +33531,61 @@ function getGridLocation(event) {
 }
 function flood(point) {
     var blocks = new Array();
-    var inner = function (pt) {
-        var block = blockImage.Grid[pt.Y][pt.X];
-        if (block.Filled) {
-            return;
-        }
-        block.Filled = true;
-        blocks.push(block);
-        // fill left
-        if (pt.X - 1 >= 0) {
-            if (block.Idx === blockImage.Grid[pt.Y][pt.X - 1].Idx) {
-                inner({ X: pt.X - 1, Y: pt.Y });
-            }
-        }
-        // fill right
-        if (pt.X + 1 < blockImage.Grid[pt.Y].length) {
-            if (block.Idx === blockImage.Grid[pt.Y][pt.X + 1].Idx) {
-                inner({ X: pt.X + 1, Y: pt.Y });
-            }
-        }
-        // fill up
-        if (pt.Y - 1 >= 0) {
-            if (block.Idx === blockImage.Grid[pt.Y - 1][pt.X].Idx) {
-                inner({ X: pt.X, Y: pt.Y - 1 });
-            }
-        }
-        // fill down
-        if (pt.Y + 1 < blockImage.Grid.length) {
-            if (block.Idx === blockImage.Grid[pt.Y + 1][pt.X].Idx) {
-                inner({ X: pt.X, Y: pt.Y + 1 });
-            }
-        }
-    };
-    inner(point);
-    var canvas = document.querySelector("#canvas");
-    var c = canvas.getContext("2d");
-    if (!c) {
-        console.log("Couldn't get canvas context.");
+    var stack = new Array();
+    var block = blockImage.Grid[point.Y][point.X];
+    if (block.Filled) {
         return;
     }
-    blocks.forEach(function (block) {
-        paintBlock(c, blockImage, block);
+    stack.push(point);
+    while (stack.length > 0) {
+        var pt = stack.pop();
+        if (pt != null) {
+            block = blockImage.Grid[pt.Y][pt.X];
+            block.Filled = true;
+            blocks.push(block);
+            // fill left
+            if (pt.X - 1 >= 0) {
+                var other = blockImage.Grid[pt.Y][pt.X - 1];
+                if (block.Idx === other.Idx && !other.Filled) {
+                    stack.push({ X: pt.X - 1, Y: pt.Y });
+                }
+            }
+            // fill right
+            if (pt.X + 1 < blockImage.Grid[pt.Y].length) {
+                var other = blockImage.Grid[pt.Y][pt.X + 1];
+                if (block.Idx === other.Idx && !other.Filled) {
+                    stack.push({ X: pt.X + 1, Y: pt.Y });
+                }
+            }
+            // fill up
+            if (pt.Y - 1 >= 0) {
+                var other = blockImage.Grid[pt.Y - 1][pt.X];
+                if (block.Idx === other.Idx && !other.Filled) {
+                    stack.push({ X: pt.X, Y: pt.Y - 1 });
+                }
+            }
+            // fill down
+            if (pt.Y + 1 < blockImage.Grid.length) {
+                var other = blockImage.Grid[pt.Y + 1][pt.X];
+                if (block.Idx === other.Idx && !other.Filled) {
+                    stack.push({ X: pt.X, Y: pt.Y + 1 });
+                }
+            }
+        }
+        else {
+            break;
+        }
+    }
+    with2dContext(function (c) {
+        blocks.forEach(function (block) {
+            paintBlock(c, blockImage, block);
+        });
     });
 }
 function handleDoubleClick(event) {
     event.preventDefault();
     var pt = getGridLocation(event);
     flood(pt);
-    render(blockImage);
 }
 function handleClick(event) {
     event.preventDefault();
@@ -33533,18 +33597,15 @@ function handleMouseMove(event) {
     if (down) {
         event.preventDefault();
         var pt = getGridLocation(event);
-        var block = blockImage.Grid[pt.Y][pt.X];
-        block.Filled = true;
-        var canvas = document.querySelector("#canvas");
-        var c = canvas.getContext("2d");
-        if (!c) {
-            console.log("Couldn't get canvas context.");
-            return;
-        }
-        paintBlock(c, blockImage, block);
+        var block_1 = blockImage.Grid[pt.Y][pt.X];
+        block_1.Filled = true;
+        with2dContext(function (c) { return paintBlock(c, blockImage, block_1); });
     }
 }
-function handleMouseDown() {
+function handleMouseDown(event) {
+    if (event.detail > 1) {
+        event.preventDefault();
+    }
     down = true;
 }
 function handleMouseUp() {
