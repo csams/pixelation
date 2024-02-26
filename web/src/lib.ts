@@ -1,4 +1,5 @@
 import { Block, BlockImage, Point } from "./types"
+import { MouseEvent } from "react";
 
 var blockImage: BlockImage;
 var down = false;
@@ -44,7 +45,7 @@ function render(image: BlockImage): void {
     }));
 }
 
-export function handleSubmit(event: SubmitEvent): void {
+export function handleSubmit(event: MouseEvent<HTMLFormElement>): void {
     event.preventDefault();
     const fd = new FormData(document.querySelector("#form") as HTMLFormElement);
     fetch("/api/convert", {
@@ -72,44 +73,62 @@ function getGridLocation(event: MouseEvent): Point {
     return { X: x, Y: y };
 }
 
-function flood(pt: Point): void {
-    let block: Block = blockImage.Grid[pt.Y][pt.X];
-    if (block.Filled) {
+function flood(point: Point): void {
+    let blocks = new Array<Block>();
+
+    let inner = (pt: Point) => {
+        let block: Block = blockImage.Grid[pt.Y][pt.X];
+        if (block.Filled) {
+            return;
+        }
+
+        block.Filled = true;
+        blocks.push(block);
+
+        // fill left
+        if (pt.X - 1 >= 0) {
+            if (block.Idx === blockImage.Grid[pt.Y][pt.X - 1].Idx) {
+                inner({ X: pt.X - 1, Y: pt.Y });
+            }
+        }
+
+        // fill right
+        if (pt.X + 1 < blockImage.Grid[pt.Y].length) {
+            if (block.Idx === blockImage.Grid[pt.Y][pt.X + 1].Idx) {
+                inner({ X: pt.X + 1, Y: pt.Y });
+            }
+        }
+
+        // fill up
+        if (pt.Y - 1 >= 0) {
+            if (block.Idx === blockImage.Grid[pt.Y - 1][pt.X].Idx) {
+                inner({ X: pt.X, Y: pt.Y - 1 });
+            }
+        }
+
+        // fill down
+        if (pt.Y + 1 < blockImage.Grid.length) {
+            if (block.Idx === blockImage.Grid[pt.Y + 1][pt.X].Idx) {
+                inner({ X: pt.X, Y: pt.Y + 1 });
+            }
+        }
+    }
+    inner(point);
+
+    const canvas = document.querySelector("#canvas") as HTMLCanvasElement;
+    let c = canvas.getContext("2d") as CanvasRenderingContext2D;
+
+    if (!c) {
+        console.log("Couldn't get canvas context.");
         return;
     }
 
-    block.Filled = true;
-
-    // fill left
-    if (pt.X - 1 >= 0) {
-        if (block.Idx === blockImage.Grid[pt.Y][pt.X - 1].Idx) {
-            flood({ X: pt.X - 1, Y: pt.Y });
-        }
-    }
-
-    // fill right
-    if (pt.X + 1 < blockImage.Grid[pt.Y].length) {
-        if (block.Idx === blockImage.Grid[pt.Y][pt.X + 1].Idx) {
-            flood({ X: pt.X + 1, Y: pt.Y });
-        }
-    }
-
-    // fill up
-    if (pt.Y - 1 >= 0) {
-        if (block.Idx === blockImage.Grid[pt.Y - 1][pt.X].Idx) {
-            flood({ X: pt.X, Y: pt.Y - 1 });
-        }
-    }
-
-    // fill down
-    if (pt.Y + 1 < blockImage.Grid.length) {
-        if (block.Idx === blockImage.Grid[pt.Y + 1][pt.X].Idx) {
-            flood({ X: pt.X, Y: pt.Y + 1 });
-        }
-    }
+    blocks.forEach(block => {
+        paintBlock(c, blockImage, block);
+    });
 }
 
-function handleDoubleClick(event: MouseEvent): void {
+function handleDoubleClick(event: MouseEvent<HTMLCanvasElement>): void {
     event.preventDefault();
     let pt = getGridLocation(event);
     flood(pt);
@@ -125,14 +144,22 @@ function handleClick(event: MouseEvent): void {
     render(blockImage);
 }
 
-function handleMouseMove(event: MouseEvent): void {
+function handleMouseMove(event: MouseEvent<HTMLCanvasElement>): void {
     if (down) {
         event.preventDefault();
 
         let pt = getGridLocation(event);
 
-        blockImage.Grid[pt.Y][pt.X].Filled = true;
-        render(blockImage);
+        let block = blockImage.Grid[pt.Y][pt.X];
+        block.Filled = true;
+        const canvas = document.querySelector("#canvas") as HTMLCanvasElement;
+        let c = canvas.getContext("2d") as CanvasRenderingContext2D;
+
+        if (!c) {
+            console.log("Couldn't get canvas context.");
+            return;
+        }
+        paintBlock(c, blockImage, block);
     }
 }
 
