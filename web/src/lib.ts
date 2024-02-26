@@ -180,7 +180,6 @@ function handleMouseMove(event: MouseEvent<HTMLCanvasElement>): void {
         event.preventDefault();
 
         let pt = getGridLocation(event);
-
         let block = blockImage.Grid[pt.Y][pt.X];
         block.Filled = true;
         with2dContext(c => paintBlock(c, blockImage, block));
