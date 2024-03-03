@@ -14,7 +14,7 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.tsx?$/,
+                test: /\.(j|t)sx?$/,
                 use: 'ts-loader',
                 exclude: /node_modules/,
             },
@@ -26,7 +26,6 @@ module.exports = {
                     },
                     {
                         loader: 'css-loader'
-
                     },
                     {
                         loader: 'postcss-loader',
@@ -41,13 +40,12 @@ module.exports = {
                     {
                         loader: 'sass-loader'
                     }
-
                 ],
             },
         ],
     },
     resolve: {
-        extensions: ['.tsx', '.d.ts', '.ts', '.js'],
+        extensions: ['.tsx', '.ts', '.js'],
     },
     output: {
         filename: 'main.js',

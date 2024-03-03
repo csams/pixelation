@@ -1,7 +1,10 @@
 import App from "./app";
 import React from "react";
-import { render } from "react-dom";
+import { createRoot } from "react-dom/client"
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const domNode = document.querySelector("#app");
-
-render(<App />, domNode);
+if (domNode) {
+    const root = createRoot(domNode);
+    root.render(<App />);
+}

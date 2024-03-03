@@ -1,14 +1,16 @@
 {
   "name": "Pixelator",
-  "author": "cwsams@gmail.com",
+  "author": "Chris Sams",
   "version": "0.0.1",
   "private": true,
   "scripts": {
     "build": "webpack --config webpack.config.js"
   },
   "devDependencies": {
+    "@types/bootstrap": "^5.2.10",
     "@types/node": "^20.11.20",
     "@types/react": "^18.2.58",
+    "@types/react-bootstrap": "^0.32.35",
     "@types/react-dom": "^18.2.19",
     "@types/webpack": "^5.28.5",
     "autoprefixer": "^10.4.17",
@@ -25,6 +27,7 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
+    "@popperjs/core": "^2.11.8",
     "bootstrap": "^5.3.3",
     "react-bootstrap": "^2.10.1"
   }
