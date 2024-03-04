@@ -1,12 +1,18 @@
 import React, { useEffect, useState } from 'react'
+import { MouseEvent } from 'react'
 import Button from 'react-bootstrap/Button'
 
-import { Block, Point } from './types'
-import { MouseEvent } from 'react'
+import { Block, Point } from './blockimage'
 
-function BlockCanvas({ image }) {
+function BlockCanvas({ image, paletteIndex }) {
   const [down, setDown] = useState(false)
-  useEffect(render, [image])
+  useEffect(() => {
+    clear()
+    render()
+  }, [image])
+  useEffect(() => {
+    render()
+  }, [paletteIndex])
 
   function render(): void {
     let canvas = document.querySelector('#canvas') as HTMLCanvasElement
@@ -33,10 +39,11 @@ function BlockCanvas({ image }) {
 
   function paintBlock(c: CanvasRenderingContext2D, block: Block): void {
     let rect = block.Rect
+    let p = image.Palette[block.Idx]
     if (block.Filled) {
-      let p = image.Palette[block.Idx]
-      let color: string = `rgb(${p.R}, ${p.G}, ${p.B})`
+      let color = `rgb(${p.R}, ${p.G}, ${p.B})`
       c.fillStyle = color
+      c.strokeStyle = color
       c.fillRect(
         rect.Min.X,
         rect.Min.Y,
@@ -45,8 +52,13 @@ function BlockCanvas({ image }) {
       )
     } else {
       let d = Math.floor(image.BlockSize / 2)
+      let color =
+        block.Idx === paletteIndex
+          ? `rgb(${p.R}, ${p.G}, ${p.B})`
+          : `rgba(0,0,0,0.3)`
       c.textAlign = 'center'
-      c.fillStyle = 'black'
+      c.fillStyle = color
+      c.strokeStyle = color
       c.font = image.Font
       c.lineWidth = 1
       c.strokeRect(
@@ -108,7 +120,7 @@ function BlockCanvas({ image }) {
     let stack = new Array<Point>()
 
     let block: Block = image.Grid[point.Y][point.X]
-    if (block.Filled) {
+    if (block.Filled || block.Idx !== paletteIndex) {
       return
     }
 
@@ -186,8 +198,10 @@ function BlockCanvas({ image }) {
 
       let pt = getGridLocation(event)
       let block = image.Grid[pt.Y][pt.X]
-      block.Filled = true
-      with2dContext((c) => paintBlock(c, block))
+      if (block.Idx == paletteIndex) {
+        block.Filled = true
+        with2dContext((c) => paintBlock(c, block))
+      }
     }
   }
 
@@ -204,18 +218,24 @@ function BlockCanvas({ image }) {
 
   return (
     <div id='picture' className='picture-container'>
-      <div className='controls'>
-        <Button onClick={handleFloodFill}>Fill</Button>
-        <Button onClick={handleClear}>Clear</Button>
+      <div className='m-2' style={{ display: 'block' }}>
+        <Button className='m-2' onClick={handleFloodFill}>
+          Fill
+        </Button>
+        <Button className='m-2' onClick={handleClear}>
+          Clear
+        </Button>
       </div>
-      <canvas
-        id='canvas'
-        className='picture'
-        onMouseDown={handleMouseDown}
-        onMouseUp={handleMouseUp}
-        onMouseMove={handleMouseMove}
-        onDoubleClick={handleDoubleClick}
-      />
+      <div className='m-2' style={{ display: 'block' }}>
+        <canvas
+          id='canvas'
+          className='picture'
+          onMouseDown={handleMouseDown}
+          onMouseUp={handleMouseUp}
+          onMouseMove={handleMouseMove}
+          onDoubleClick={handleDoubleClick}
+        />
+      </div>
     </div>
   )
 }

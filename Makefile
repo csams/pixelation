@@ -9,6 +9,14 @@ build: require-go ## build the thing
 	go mod tidy
 	go build -o ./bin/pixelate main.go
 
+.PHONY: web
+web:
+	cd web && npm run build && cd ..
+
+.PHONY: run
+run:
+	./bin/pixelate --serve
+
 .PHONY: test
 test: WHAT ?= ./...
 test: build require-go
